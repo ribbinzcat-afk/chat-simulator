@@ -86,7 +86,7 @@
 img.chat-sim-sticker {
     max-width: 160px !important;
     max-height: 160px !important;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 10px;
     margin: 5px 0;
     display: block;
@@ -100,6 +100,7 @@ img.chat-sim-sticker {
 img.chat-sim-media {
     max-width: 160px !important;
     max-height: 160px !important;
+    object-fit: cover;
     border-radius: 10px;
     margin-top: 8px;
     display: block;
