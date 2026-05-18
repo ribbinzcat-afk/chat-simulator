@@ -47,16 +47,20 @@ const themes = {
 };
 
 const defaultSettings = {
+    enabled: true, // <-- เพิ่มตรงนี้
     stickers: [],
     showAvatars: true,
-    theme: 'default' // เพิ่มการตั้งค่าธีมเริ่มต้น
+    theme: 'default'
 };
 
-// อัปเดตฟังก์ชัน loadSettings เดิม ให้เป็นแบบนี้ครับ
 function loadSettings() {
     extension_settings[extensionName] = extension_settings[extensionName] || {};
     if (Object.keys(extension_settings[extensionName]).length === 0) {
         Object.assign(extension_settings[extensionName], defaultSettings);
+    }
+    // เช็คค่าเก่าเผื่อยังไม่มี
+    if (extension_settings[extensionName].enabled === undefined) {
+        extension_settings[extensionName].enabled = true;
     }
     if (!extension_settings[extensionName].stickers) {
         extension_settings[extensionName].stickers = [];
@@ -68,11 +72,11 @@ function loadSettings() {
         extension_settings[extensionName].theme = 'default';
     }
 
-    // อัปเดต UI
+    // อัปเดต UI ให้ตรงกับค่าที่เซฟไว้
+    $("#chat-simulator-enable").prop("checked", extension_settings[extensionName].enabled); // <-- เพิ่มตรงนี้
     $("#chat-simulator-show-avatars").prop("checked", extension_settings[extensionName].showAvatars);
     $("#chat-simulator-theme-select").val(extension_settings[extensionName].theme);
 
-    // ใช้ธีมที่บันทึกไว้
     applyTheme(extension_settings[extensionName].theme);
 }
 
@@ -317,7 +321,10 @@ function debouncedProcessAll() {
         clearTimeout(updateTimeout);
     }
     updateTimeout = setTimeout(() => {
-        processChatUIInDOM(); // ตอนนี้ฟังก์ชันนี้ทำทุกอย่างจบในตัวเดียวแล้ว
+        // --- NEW: ถ้าสวิตช์หลักปิดอยู่ ให้หยุดทำงานทันที ไม่ต้องสร้างกรอบแชท ---
+        if (!extension_settings[extensionName].enabled) return;
+
+        processChatUIInDOM();
     }, 800);
 }
 
@@ -376,6 +383,25 @@ jQuery(async () => {
         applyTheme(selected);
     });
 
+    // --- NEW: ผูก Event ให้ Master Toggle ---
+    $(document).on("change", "#chat-simulator-enable", async function () {
+        const isChecked = $(this).prop("checked");
+        extension_settings[extensionName].enabled = isChecked;
+        saveSettingsDebounced();
+
+        console.log(`[${extensionName}] Extension enabled: ${isChecked}. Reloading chat...`);
+
+        // รีโหลดแชทเพื่อให้ ST ล้าง UI เก่าออก
+        await reloadCurrentChat();
+
+        // ซ่อนหรือแสดงแถบ Quick Input ตามสถานะหลัก
+        if (isChecked && $("#chat-simulator-show-quickbar").prop("checked")) {
+            $("#chat-sim-quick-bar").show();
+        } else {
+            $("#chat-sim-quick-bar").hide();
+        }
+    });
+
     // --- NEW: สร้างแถบ Quick Input Bar แทรกเหนือช่องแชทหลัก ---
     const quickInputHtml = `
             <div id="chat-sim-quick-bar" style="display: flex; gap: 8px; padding: 8px; background: var(--SmartThemeBlurTintColor); border-radius: 10px 10px 0 0; border-bottom: 1px solid var(--SmartThemeBorderColor); margin-bottom: -5px; z-index: 10;">
@@ -388,6 +414,20 @@ jQuery(async () => {
                 </div>
             </div>
         `;
+
+    // ก่อนจะ prepend แถบ Quick Input ให้เช็คสวิตช์หลักก่อน
+    if (extension_settings[extensionName].enabled) {
+        $("#chat_form").prepend(quickInputHtml);
+
+        // เช็ค Toggle ย่อยของ Quick Bar ด้วย
+        if (!$("#chat-simulator-show-quickbar").prop("checked")) {
+            $("#chat-sim-quick-bar").hide();
+        }
+    } else {
+        // ถ้าปิด Extension ไว้ ก็สร้างแถบเตรียมไว้แต่ซ่อนมันไปเลย
+        $("#chat_form").prepend(quickInputHtml);
+        $("#chat-sim-quick-bar").hide();
+    }
 
     // แทรกแถบเครื่องมือนี้ไว้ก่อนช่องพิมพ์ข้อความหลักของ ST
     $("#chat_form").prepend(quickInputHtml);
