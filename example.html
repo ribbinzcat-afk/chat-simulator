@@ -1,0 +1,67 @@
+<div class="chat-simulator-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>Chat Simulator</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+
+            <!-- ส่วนตั้งค่าทั่วไป -->
+            <div
+                style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--SmartThemeBorderColor);">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input id="chat-simulator-show-avatars" type="checkbox" />
+                    <b>แสดงรูปโปรไฟล์ (Avatars)</b>
+                </label>
+                <small>เปิดเพื่อแสดงรูปโปรไฟล์ของตัวละครและผู้ใช้ในกรอบแชทและสายเรียกเข้า</small>
+            </div>
+
+            <!-- ส่วนเลือกธีม -->
+            <div
+                style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--SmartThemeBorderColor);">
+                <label style="display: block; margin-bottom: 5px;"><b>เลือกธีมแชท (Chat Theme)</b></label>
+                <select id="chat-simulator-theme-select" class="text_pole" style="width: 100%; max-width: 200px;">
+                    <option value="default">Modern Blue (ค่าเริ่มต้น)</option>
+                    <option value="line">Classic Green (Line Style)</option>
+                    <option value="dark">Dark Mode (โหมดกลางคืน)</option>
+                    <!-- ธีมใหม่ -->
+                    <option value="mocha">Mocha (น้ำตาล-ขาว)</option>
+                    <option value="monochrome">Monochrome (เทา-ขาว)</option>
+                    <option value="pastel">Pastel (พาสเทลปุ๊กปิ๊ก)</option>
+                </select>
+                <small style="display: block; margin-top: 5px;">เปลี่ยนสีสันของบับเบิ้ลแชทให้เข้ากับบรรยากาศ</small>
+            </div>
+
+            <!-- ส่วนตั้งค่าแถบพิมพ์ด่วน -->
+            <div
+                style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--SmartThemeBorderColor);">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input id="chat-simulator-show-quickbar" type="checkbox" checked />
+                    <b>แสดงแถบพิมพ์ข้อความลัด (Quick Input Bar)</b>
+                </label>
+                <small>แสดงช่องพิมพ์พิเศษเหนือช่องแชทหลัก เพื่อความรวดเร็วในการส่งข้อความจำลอง</small>
+            </div>
+
+            <h4>Sticker Library</h4>
+
+            <!-- ส่วนเพิ่มสติกเกอร์ -->
+            <div
+                style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--SmartThemeBorderColor);">
+                <input id="chat-simulator-sticker-name" type="text" class="text_pole"
+                    placeholder="ชื่อสติกเกอร์ (เช่น: hello)" />
+                <input id="chat-simulator-sticker-url" type="text" class="text_pole" placeholder="ลิงก์รูปภาพ (URL)" />
+                <div id="chat-simulator-add-sticker-btn" class="menu_button">
+                    <i class="fa-solid fa-plus"></i> Add Sticker
+                </div>
+                <small>เมื่อตั้งชื่อว่า hello คุณจะสามารถพิมพ์ ::hello:: ในแชทเพื่อส่งสติกเกอร์นี้ได้
+                    (ระบบแทนที่จะทำในขั้นต่อไป)</small>
+            </div>
+
+            <!-- ส่วนแสดงรายการสติกเกอร์ -->
+            <div id="chat-simulator-sticker-list" style="max-height: 200px; overflow-y: auto;">
+                <!-- รายการสติกเกอร์จะถูกสร้างที่นี่โดย JS -->
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,230 @@
+/* =========================================
+   Chat Simulator - Theme Foundation & UI
+   ========================================= */
+
+/* 1. ถังสีหลัก (Root Variables) */
+:root {
+    /* --- ธีมเริ่มต้น (Modern Light / Default) --- */
+    --chatsim-bg-left: #f0f2f5;        /* สีพื้นบับเบิ้ลฝั่งซ้าย (AI) */
+    --chatsim-text-left: #1c1e21;      /* สีตัวอักษรฝั่งซ้าย */
+
+    --chatsim-bg-right: #0084ff;       /* สีพื้นบับเบิ้ลฝั่งขวา (User - สไตล์ Messenger) */
+    --chatsim-text-right: #ffffff;     /* สีตัวอักษรฝั่งขวา */
+
+    /* สีของกล่องพิเศษต่างๆ */
+    --chatsim-color-gift: #ff4b4b;     /* สีแดงอั่งเปา */
+    --chatsim-color-slip: #0052cc;     /* สีน้ำเงินสลิป */
+    --chatsim-color-loc: #00a884;      /* สีเขียวพิกัด (สไตล์ WhatsApp) */
+    --chatsim-color-music: #1db954;    /* สีเขียว Spotify */
+    --chatsim-color-voice: #ff8c00;    /* สีส้มข้อความเสียง */
+    --chatsim-color-call: #202c33;     /* สีพื้นหลังสายเรียกเข้า (เข้ม) */
+
+    /* รูปร่างและเงา (ปรับให้โค้งมนและมีมิติ) */
+    --chatsim-radius-bubble: 20px;
+    --chatsim-radius-box: 16px;
+    --chatsim-shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --chatsim-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --chatsim-transition: all 0.3s ease;
+}
+
+/* =========================================
+   2. โครงสร้างหลัก (Main Layout)
+   ========================================= */
+.chat-sim-container {
+    display: flex;
+    width: 100%;
+    margin: 12px 0;
+    font-family: 'Sarabun', 'Segoe UI', sans-serif;
+    align-items: flex-end; /* ให้รูปโปรไฟล์อยู่ชิดขอบล่างของบับเบิ้ล */
+}
+
+.chat-sim-left { justify-content: flex-start; }
+.chat-sim-right { justify-content: flex-end; }
+
+/* รูปโปรไฟล์ */
+.chat-sim-bubble-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 10px;
+    box-shadow: var(--chatsim-shadow-soft);
+    background-color: #e4e6eb;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* =========================================
+   3. บับเบิ้ลแชท (Chat Bubbles)
+   ========================================= */
+.chat-sim-bubble {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: var(--chatsim-radius-bubble);
+    font-size: 0.95em;
+    line-height: 1.5;
+    word-wrap: break-word;
+    box-shadow: var(--chatsim-shadow-soft);
+}
+
+/* ฝั่งซ้าย (AI) */
+.chat-sim-left .chat-sim-bubble {
+    background-color: var(--chatsim-bg-left);
+    color: var(--chatsim-text-left);
+    border-bottom-left-radius: 4px; /* มุมแหลมชี้ลงซ้าย */
+}
+
+/* ฝั่งขวา (User) */
+.chat-sim-right .chat-sim-bubble {
+    background-color: var(--chatsim-bg-right);
+    color: var(--chatsim-text-right);
+    border-bottom-right-radius: 4px; /* มุมแหลมชี้ลงขวา */
+}
+
+/* =========================================
+   4. Media & สติกเกอร์
+   ========================================= */
+img.chat-sim-sticker {
+    max-width: 160px !important;
+    max-height: 160px !important;
+    object-fit: contain;
+    border-radius: 10px;
+    margin: 5px 0;
+    display: block;
+}
+
+.chat-sim-bubble img.chat-sim-sticker {
+    margin: 0;
+    box-shadow: none; /* เอาเงาออกเมื่ออยู่ในบับเบิ้ล */
+}
+
+img.chat-sim-media {
+    max-width: 160px !important;
+    max-height: 160px !important;
+    border-radius: 10px;
+    margin-top: 8px;
+    display: block;
+    box-shadow: var(--chatsim-shadow-soft);
+}
+
+/* =========================================
+   5. กล่องพิเศษ (อั่งเปา, สลิป, พิกัด, ฯลฯ)
+   ========================================= */
+.chat-sim-special-box {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 14px;
+    margin-top: 8px;
+    border-radius: var(--chatsim-radius-box);
+    min-width: 220px;
+    box-shadow: var(--chatsim-shadow-soft);
+    transition: var(--chatsim-transition);
+    color: #ffffff; /* ตัวหนังสือในกล่องพิเศษเป็นสีขาวเสมอ */
+}
+
+.chat-sim-special-box:hover {
+    box-shadow: var(--chatsim-shadow-hover);
+    transform: translateY(-2px); /* ลอยขึ้นนิดๆ เมื่อเอาเมาส์ชี้ */
+}
+
+.chat-sim-icon {
+    font-size: 1.8em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.2); /* พื้นหลังไอคอนโปร่งแสง */
+    border-radius: 50%;
+}
+
+.chat-sim-details { display: flex; flex-direction: column; }
+.chat-sim-title { font-weight: 700; font-size: 1.05em; margin-bottom: 2px; }
+.chat-sim-desc { font-size: 0.85em; opacity: 0.9; }
+.chat-sim-amount { font-weight: 800; font-size: 1.2em; margin-top: 4px; }
+
+/* การดึงสีจาก Root มาใช้ */
+.chat-sim-gift { background-color: var(--chatsim-color-gift); }
+.chat-sim-slip { background-color: var(--chatsim-color-slip); }
+.chat-sim-loc { background-color: var(--chatsim-color-loc); }
+.chat-sim-music { background-color: var(--chatsim-color-music); }
+.chat-sim-voice { background-color: var(--chatsim-color-voice); }
+
+/* ปุ่ม Play ข้อความเสียง */
+.voice-play-btn { cursor: pointer; transition: var(--chatsim-transition); }
+.voice-play-btn:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.05); }
+.chat-sim-voice-text {
+    font-size: 0.9em;
+    color: inherit;
+    border-left: 4px solid var(--chatsim-color-voice);
+    padding: 10px;
+    margin-top: 10px;
+    background: rgba(0,0,0,0.03);
+    border-radius: 0 8px 8px 0;
+}
+
+/* =========================================
+   6. สายเรียกเข้า (Call UI)
+   ========================================= */
+.chat-sim-call-container {
+    background-color: var(--chatsim-color-call);
+    color: #ffffff;
+    border-radius: var(--chatsim-radius-box);
+    margin: 16px auto;
+    overflow: hidden;
+    box-shadow: var(--chatsim-shadow-hover);
+    font-family: 'Sarabun', sans-serif;
+    max-width: 350px;
+}
+
+.chat-sim-call-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background: rgba(255,255,255,0.05);
+    gap: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+img.chat-sim-call-avatar-img {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.chat-sim-call-name { font-size: 1.25em; font-weight: 700; }
+.chat-sim-call-status { font-size: 0.85em; color: #4ade80; margin-top: 2px; }
+.chat-sim-call-icon { font-size: 1.5em; opacity: 0.3; margin-left: auto; }
+
+.chat-sim-call-content {
+    padding: 20px 16px;
+    font-size: 1em;
+    line-height: 1.6;
+    min-height: 100px;
+    font-style: italic;
+    text-align: center;
+}
+
+.chat-sim-call-footer {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0,0,0,0.2);
+}
+
+.call-btn {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: var(--chatsim-transition);
+}
+
+.call-btn.end-call { background-color: #ff4b4b; color: white; box-shadow: 0 4px 10px rgba(255, 75, 75, 0.4); }
+.call-btn.end-call:hover { background-color: #ff3333; transform: scale(1.05); }
