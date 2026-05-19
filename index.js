@@ -154,28 +154,24 @@ function onAddStickerClick() {
     toastr.success("เพิ่มสติกเกอร์แล้ว", "Chat Simulator");
 }
 
-// --- อัปเดต: ฟังก์ชันรวมมิตร (Chat UI + Media + Stickers) ---
+// --- อัปเดต: ฟังก์ชันรวมมิตร (Chat UI + Media + Stickers) เวอร์ชันจัดระเบียบขั้นสุด ---
 function processChatUIInDOM() {
     const showAvatars = extension_settings[extensionName].showAvatars;
     const stickers = extension_settings[extensionName].stickers || [];
 
-    $(".mes").each(function () {
+    $(".mes").each(function() {
         const isUser = $(this).attr('is_user') === 'true';
         const mesTextContainer = $(this).find('.mes_text');
 
-        // [แก้ไขปัญหา 1] ดึง URL รูปโปรไฟล์ให้ครอบคลุมที่สุด
-        // หาจาก img ใน avatar ก่อน ถ้าไม่เจอ ให้ดึง attribute avatar จากตัว mes เอง
         let avatarUrl = $(this).find('.avatar img, .mes_avatar img').attr('src');
         if (!avatarUrl) {
             const avatarAttr = $(this).attr('avatar');
-            if (avatarAttr) avatarUrl = `/characters/${avatarAttr}`; // พาธสำหรับรูป Char
+            if (avatarAttr) avatarUrl = `/characters/${avatarAttr}`;
         }
-        // พาธสำหรับรูป User (เผื่อหาไม่เจอ)
         if (!avatarUrl && isUser) avatarUrl = '/User Avatars/user.png';
 
         const fallbackAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
 
-        // ฟังก์ชันช่วยสร้าง HTML สำหรับ Avatar
         const getAvatarHtml = () => {
             if (!showAvatars) return '';
             return `<img src="${avatarUrl}" class="chat-sim-bubble-avatar" onerror="this.onerror=null; this.src='${fallbackAvatar}'; this.style.backgroundColor='#cccccc';">`;
@@ -185,150 +181,77 @@ function processChatUIInDOM() {
         if (!html) return;
 
         let modified = false;
+        const senderName = isUser ? 'คุณ' : ($(this).attr('ch_name') || 'ตัวละคร');
 
-        // [แก้ไขปัญหา 2 - ขั้นตอนที่ 1] แปลง ::ชื่อ:: เป็น <img> ธรรมดาก่อนเสมอ
+        // [ขั้นที่ 1] ติดป้าย 'chat-sim-raw-media' ให้กับของเล่นทุกชิ้น
+
+        // Stickers
         stickers.forEach(sticker => {
             const regex = new RegExp(`::${sticker.name}::`, 'g');
             if (regex.test(html)) {
-                // ใส่คลาสพิเศษ 'chat-sim-raw-sticker' ไว้เพื่อบอกว่านี่คือสติกเกอร์
-                const imgHtml = `<img src="${sticker.url}" class="chat-sim-sticker chat-sim-raw-sticker" alt="${sticker.name}" title="${sticker.name}">`;
+                const imgHtml = `<img src="${sticker.url}" class="chat-sim-sticker chat-sim-raw-media" alt="${sticker.name}" title="${sticker.name}">`;
                 html = html.replace(regex, imgHtml);
                 modified = true;
             }
         });
 
-        // 1. [IMG]url[/IMG]
+        // [IMG]
         const imgRegex = /\[IMG\](.*?)\[\/IMG\]/g;
         if (imgRegex.test(html)) {
-            html = html.replace(imgRegex, `<img src="$1" class="chat-sim-media" alt="image" onerror="this.style.display='none'">`);
+            html = html.replace(imgRegex, `<img src="$1" class="chat-sim-media chat-sim-raw-media" alt="image" onerror="this.style.display='none'">`);
             modified = true;
         }
 
-        // ดึงชื่อคนส่ง (เพื่อเอาไปใส่ในสลิปและอั่งเปา)
-        const senderName = isUser ? 'คุณ' : ($(this).attr('ch_name') || 'ตัวละคร');
-
-        // 2. [GIFT] - อั่งเปา (Interactive: กดเปิดได้)
+        // [GIFT]
         const giftRegex = /\[GIFT:(open|closed)\](.*?)\[\/GIFT\]/g;
         if (giftRegex.test(html)) {
             html = html.replace(giftRegex, (match, status, amount) => {
                 const isOpen = status === 'open';
-
-                // UI ซองที่เปิดแล้ว
-                const openedHtml = `
-                <div class="chat-sim-new-gift-opened" ${!isOpen ? 'style="display: none;"' : ''}>
-                    <div class="gift-open-strip"></div>
-                    <div class="gift-open-content">
-                        <div class="gift-open-icon">🧧</div>
-                        <span style="font-size: 12px; color: #795548; margin-top: 5px;">คุณได้รับอั่งเปาแล้ว</span>
-                        <div style="font-size: 20px; font-weight: 700; color: #d32f2f;">${amount}</div>
-                        <span style="font-size: 10px; color: #9e9e9e;">โอนเข้าธนาคารเรียบร้อย</span>
-                    </div>
-                </div>`;
-
-                // UI ซองปิด (มี onclick เพื่อซ่อนตัวเองและโชว์ซองเปิด)
-                const closedHtml = `
-                <div class="chat-sim-new-gift-closed" onclick="$(this).hide(); $(this).siblings('.chat-sim-new-gift-opened').fadeIn(300);">
-                    <div class="gift-decor"></div>
-                    <div class="gift-content">
-                        <div class="gift-icon">🧧</div>
-                        <div style="display: flex; flex-direction: column;">
-                            <span style="font-size: 15px; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">อั่งเปาของขวัญ</span>
-                            <span style="font-size: 12px; color: #ffecb3;">กดเพื่อเปิดซองของขวัญ</span>
-                        </div>
-                    </div>
-                    <div class="gift-footer">
-                        <span>${senderName} ส่งของขวัญให้คุณ</span><span style="color: #fff;">>></span>
-                    </div>
-                </div>`;
-
-                // ถ้าสถานะคือ open ให้แสดงแค่ซองเปิด ถ้า closed ให้แสดงทั้งคู่ (ซองเปิดซ่อนไว้)
-                return `<div class="angpao-wrapper">${isOpen ? openedHtml : closedHtml + openedHtml}</div>`;
+                const openedHtml = `<div class="chat-sim-new-gift-opened" ${!isOpen ? 'style="display: none;"' : ''}><div class="gift-open-strip"></div><div class="gift-open-content"><div class="gift-open-icon">🧧</div><span style="font-size: 12px; color: #795548; margin-top: 5px;">คุณได้รับอั่งเปาแล้ว</span><div style="font-size: 20px; font-weight: 700; color: #d32f2f;">${amount}</div><span style="font-size: 10px; color: #9e9e9e;">โอนเข้าธนาคารเรียบร้อย</span></div></div>`;
+                const closedHtml = `<div class="chat-sim-new-gift-closed" onclick="$(this).hide(); $(this).siblings('.chat-sim-new-gift-opened').fadeIn(300);"><div class="gift-decor"></div><div class="gift-content"><div class="gift-icon">🧧</div><div style="display: flex; flex-direction: column;"><span style="font-size: 15px; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">อั่งเปาของขวัญ</span><span style="font-size: 12px; color: #ffecb3;">กดเพื่อเปิดซองของขวัญ</span></div></div><div class="gift-footer"><span>${senderName} ส่งของขวัญให้คุณ</span><span style="color: #fff;">>></span></div></div>`;
+                return `<div class="angpao-wrapper chat-sim-raw-media">${isOpen ? openedHtml : closedHtml + openedHtml}</div>`;
             });
             modified = true;
         }
 
-        // 3. [SLIP] - สลิปโอนเงิน
+        // [SLIP]
         const slipRegex = /\[SLIP:(.*?)\](.*?)\[\/SLIP\]/g;
         if (slipRegex.test(html)) {
             html = html.replace(slipRegex, (match, name, amount) => {
-                return `
-                <div class="chat-sim-new-slip">
-                    <div class="slip-header">
-                        <div class="slip-icon"><i class="fa-solid fa-building-columns"></i></div>
-                        <p style="margin: 0; font-size: 14px; color: #555;">โอนเงินสำเร็จ</p>
-                        <p style="margin: 5px 0 0; font-size: 24px; font-weight: 600;">฿${amount}</p>
-                    </div>
-                    <div class="slip-details">
-                        <div class="slip-row"><span style="color: #888;">จาก</span><span style="font-weight: 500;">${senderName}</span></div>
-                        <div class="slip-row"><span style="color: #888;">ไปยัง</span><span style="font-weight: 500;">${name}</span></div>
-                    </div>
-                </div>`;
+                return `<div class="chat-sim-new-slip chat-sim-raw-media"><div class="slip-header"><div class="slip-icon"><i class="fa-solid fa-building-columns"></i></div><p style="margin: 0; font-size: 14px; color: #555;">โอนเงินสำเร็จ</p><p style="margin: 5px 0 0; font-size: 24px; font-weight: 600;">฿${amount}</p></div><div class="slip-details"><div class="slip-row"><span style="color: #888;">จาก</span><span style="font-weight: 500;">${senderName}</span></div><div class="slip-row"><span style="color: #888;">ไปยัง</span><span style="font-weight: 500;">${name}</span></div></div></div>`;
             });
             modified = true;
         }
 
-        // 4. [LOC] - พิกัด
+        // [LOC]
         const locRegex = /\[LOC:(.*?)\](.*?)\[\/LOC\]/g;
         if (locRegex.test(html)) {
             html = html.replace(locRegex, (match, name, desc) => {
-                return `
-                <div class="chat-sim-new-loc">
-                    <div class="loc-map">
-                        <div class="loc-grid"></div>
-                        <div class="loc-pin"><div class="loc-pin-dot"></div></div>
-                    </div>
-                    <div style="padding: 12px;">
-                        <p style="margin: 0; font-size: 14px; font-weight: 600;">${name}</p>
-                        <p style="margin: 4px 0 0; font-size: 11px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${desc}</p>
-                    </div>
-                </div>`;
+                return `<div class="chat-sim-new-loc chat-sim-raw-media"><div class="loc-map"><div class="loc-grid"></div><div class="loc-pin"><div class="loc-pin-dot"></div></div></div><div style="padding: 12px;"><p style="margin: 0; font-size: 14px; font-weight: 600;">${name}</p><p style="margin: 4px 0 0; font-size: 11px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${desc}</p></div></div>`;
             });
             modified = true;
         }
 
-        // 5. [MUSIC] - เพลง
+        // [MUSIC]
         const musicRegex = /\[MUSIC:(.*?)\](.*?)\[\/MUSIC\]/g;
         if (musicRegex.test(html)) {
             html = html.replace(musicRegex, (match, title, artist) => {
-                return `
-                <div class="chat-sim-new-music">
-                    <div class="music-art"><i class="fa-solid fa-music"></i></div>
-                    <div style="display: flex; flex-direction: column; justify-content: center; flex-grow: 1;">
-                        <p style="margin: 0; font-size: 13px; font-weight: 600;">${title}</p>
-                        <p style="margin: 2px 0 0; font-size: 11px; color: #888;">${artist}</p>
-                    </div>
-                    <div class="music-play">▶</div>
-                </div>`;
+                return `<div class="chat-sim-new-music chat-sim-raw-media"><div class="music-art"><i class="fa-solid fa-music"></i></div><div style="display: flex; flex-direction: column; justify-content: center; flex-grow: 1;"><p style="margin: 0; font-size: 13px; font-weight: 600;">${title}</p><p style="margin: 2px 0 0; font-size: 11px; color: #888;">${artist}</p></div><div class="music-play">▶</div></div>`;
             });
             modified = true;
         }
 
-        // 6. [VOICE] - ข้อความเสียง
+        // [VOICE]
         const voiceRegex = /\[VOICE\]([\s\S]*?)\[\/VOICE\]/g;
         if (voiceRegex.test(html)) {
             html = html.replace(voiceRegex, (match, text) => {
                 const voiceId = 'voice_' + Math.random().toString(36).substr(2, 9);
-                return `
-                <div class="chat-sim-voice-container">
-                    <div class="chat-sim-new-voice" id="box_${voiceId}">
-                        <div class="voice-play-btn" data-target="${voiceId}">
-                            <div class="voice-play-icon"></div>
-                        </div>
-                        <div class="voice-waveform">
-                            <div class="wave-bar wb-1"></div><div class="wave-bar wb-2"></div>
-                            <div class="wave-bar wb-3"></div><div class="wave-bar wb-4"></div>
-                            <div class="wave-bar wb-5"></div><div class="wave-bar wb-6"></div>
-                            <div class="wave-bar wb-7"></div><div class="wave-bar wb-1"></div>
-                        </div>
-                        <span style="font-size: 12px; color: #555; font-weight: 500;">00:15</span>
-                    </div>
-                    <div class="chat-sim-voice-text" id="text_${voiceId}" style="display: none;">" ${text.trim()} "</div>
-                </div>`;
+                return `<div class="chat-sim-voice-container chat-sim-raw-media"><div class="chat-sim-new-voice" id="box_${voiceId}"><div class="voice-play-btn" data-target="${voiceId}"><div class="voice-play-icon"></div></div><div class="voice-waveform"><div class="wave-bar wb-1"></div><div class="wave-bar wb-2"></div><div class="wave-bar wb-3"></div><div class="wave-bar wb-4"></div><div class="wave-bar wb-5"></div><div class="wave-bar wb-6"></div><div class="wave-bar wb-7"></div><div class="wave-bar wb-1"></div></div><span style="font-size: 12px; color: #555; font-weight: 500;">00:15</span></div><div class="chat-sim-voice-text" id="text_${voiceId}" style="display: none;">" ${text.trim()} "</div></div>`;
             });
             modified = true;
         }
 
-        // 6.5 [CALL]
+        // [CALL] (ยังคงเหมือนเดิม เพราะ Call มีโครงสร้างของตัวเองอยู่แล้ว)
         const callRegex = /\[CALL:(.*?)\]([\s\S]*?)\[\/CALL\]/g;
         if (callRegex.test(html)) {
             html = html.replace(callRegex, (match, name, content) => {
@@ -341,7 +264,7 @@ function processChatUIInDOM() {
             modified = true;
         }
 
-        // 7. [CHAT] หรือ [CHAT:L] หรือ [CHAT:R]
+        // [ขั้นที่ 2] จัดการ [CHAT] และฉีกป้าย raw ทิ้งถ้ามันถูกครอบแล้ว
         const chatRegex = /\[CHAT(?:|(:(L|R)))\]([\s\S]*?)\[\/CHAT\]/g;
         if (chatRegex.test(html)) {
             html = html.replace(chatRegex, (match, ignore, direction, content) => {
@@ -350,9 +273,8 @@ function processChatUIInDOM() {
                 else if (direction === 'R') sideClass = 'chat-sim-right';
                 else sideClass = isUser ? 'chat-sim-right' : 'chat-sim-left';
 
-                // เอาคลาส 'chat-sim-raw-sticker' ออก ถ้าสติกเกอร์ถูกครอบด้วย [CHAT] แล้ว
-                // เพื่อไม่ให้ข้อ 8 มาครอบมันซ้ำ
-                content = content.replace(/chat-sim-raw-sticker/g, '');
+                // เอาคลาส raw ออก เพราะมันมีบ้านอยู่แล้ว (อยู่ใน [CHAT])
+                content = content.replace(/chat-sim-raw-media/g, '');
 
                 if (sideClass === 'chat-sim-right') {
                     return `<div class="chat-sim-container ${sideClass}"><div class="chat-sim-bubble">${content.trim()}</div>${getAvatarHtml()}</div>`;
@@ -363,28 +285,30 @@ function processChatUIInDOM() {
             modified = true;
         }
 
-        // [แก้ไขปัญหา 2 - ขั้นตอนที่ 2] จัดการสติกเกอร์เดี่ยวๆ ที่ยังเหลืออยู่
-        // ถ้ายังมีรูปสติกเกอร์ที่มีคลาส 'chat-sim-raw-sticker' ลอยอยู่ แปลว่ามันไม่ได้อยู่ใน [CHAT]
-        // เราจะสร้างโครงสร้างแชทครอบให้มัน
-        const rawStickerRegex = /<img src="[^"]+" class="chat-sim-sticker chat-sim-raw-sticker"[^>]+>/g;
-        if (rawStickerRegex.test(html)) {
-            html = html.replace(rawStickerRegex, (match) => {
-                const sideClass = isUser ? 'chat-sim-right' : 'chat-sim-left';
-                // ลบคลาส raw ออก
-                const cleanImg = match.replace('chat-sim-raw-sticker', '');
-
-                if (sideClass === 'chat-sim-right') {
-                    return `<div class="chat-sim-container ${sideClass}">${cleanImg}${getAvatarHtml()}</div>`;
-                } else {
-                    return `<div class="chat-sim-container ${sideClass}">${getAvatarHtml()}${cleanImg}</div>`;
-                }
-            });
-            modified = true;
-        }
-
+        // นำ HTML ที่แปลงเบื้องต้นแล้ว ยัดกลับลงไปในหน้าจอ
         if (modified) {
             mesTextContainer.html(html);
         }
+
+        // [ขั้นที่ 3] ฮีโร่มาแล้ว! จับของลอยๆ ที่เหลือมาใส่ตะกร้า (Container)
+        const sideClass = isUser ? 'chat-sim-right' : 'chat-sim-left';
+
+        mesTextContainer.find('.chat-sim-raw-media').each(function() {
+            // เช็คกันเหนียวว่ามันยังไม่มี Container ครอบอยู่จริงๆ
+            if ($(this).parent().hasClass('chat-sim-container')) return;
+
+            // เอาป้าย raw ออก
+            $(this).removeClass('chat-sim-raw-media');
+
+            // เอาโครงสร้างบ้านมาครอบ และใส่รูปโปรไฟล์
+            if (sideClass === 'chat-sim-right') {
+                $(this).wrap(`<div class="chat-sim-container ${sideClass}"></div>`);
+                $(this).parent().append(getAvatarHtml());
+            } else {
+                $(this).wrap(`<div class="chat-sim-container ${sideClass}"></div>`);
+                $(this).parent().prepend(getAvatarHtml());
+            }
+        });
     });
 }
 
