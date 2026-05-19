@@ -51,6 +51,7 @@
     box-shadow: var(--chatsim-shadow-soft);
     background-color: #e4e6eb;
     border: 1px solid rgba(0,0,0,0.05);
+   flex-shrink: 0;
 }
 
 /* =========================================
@@ -202,7 +203,9 @@ img.chat-sim-media {
 .chat-sim-music-lyrics {
     background: rgba(255,255,255,0.8); border-left: 3px solid var(--chatsim-color-music);
     padding: 10px; margin-top: 5px; font-size: 0.9em; font-style: italic; color: #555;
-    border-radius: 0 8px 8px 0; width: 250px; box-sizing: border-box;
+    border-radius: 0 8px 8px 0;
+    width: 100%; /* <-- แก้ตรงนี้: ให้กว้างเต็มที่ 100% ของพื้นที่ที่มี */
+    box-sizing: border-box;
 }
 
 /* --- Voice (ข้อความเสียง) --- */
@@ -239,8 +242,11 @@ img.chat-sim-media {
 .wb-7 { height: 14px; background-color: #666; }
 .chat-sim-voice-text {
     font-size: 0.9em; border-left: 3px solid #333; padding-left: 10px; margin-top: 8px;
-    font-style: italic; color: inherit; width: 250px; box-sizing: border-box;
+    font-style: italic; color: inherit;
+    width: 100%; /* <-- แก้ตรงนี้: ให้กว้างเต็มที่ 100% ของพื้นที่ที่มี */
+    box-sizing: border-box;
 }
+
 
 /* --- Ang Pao (อั่งเปา) --- */
 .chat-sim-new-gift-closed {
