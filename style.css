@@ -122,6 +122,7 @@ img.chat-sim-media {
     max-width: 280px;
     margin-top: 8px;
     color: #333;
+   flex-shrink: 0;
 }
 .slip-header {
     background-color: #f8f9fa;
