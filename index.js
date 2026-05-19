@@ -232,11 +232,26 @@ function processChatUIInDOM() {
             modified = true;
         }
 
-        // [MUSIC]
-        const musicRegex = /\[MUSIC:(.*?)\](.*?)\[\/MUSIC\]/g;
+        // 5. [MUSIC] - เพลง (อัปเดตให้มีเนื้อเพลงซ่อนอยู่)
+        // รูปแบบใหม่: [MUSIC:ชื่อเพลง|ชื่อศิลปิน]เนื้อเพลง[/MUSIC]
+        const musicRegex = /\[MUSIC:(.*?)\|(.*?)\]([\s\S]*?)\[\/MUSIC\]/g;
         if (musicRegex.test(html)) {
-            html = html.replace(musicRegex, (match, title, artist) => {
-                return `<div class="chat-sim-new-music chat-sim-raw-media"><div class="music-art"><i class="fa-solid fa-music"></i></div><div style="display: flex; flex-direction: column; justify-content: center; flex-grow: 1;"><p style="margin: 0; font-size: 13px; font-weight: 600;">${title}</p><p style="margin: 2px 0 0; font-size: 11px; color: #888;">${artist}</p></div><div class="music-play">▶</div></div>`;
+            html = html.replace(musicRegex, (match, title, artist, lyrics) => {
+                const musicId = 'music_' + Math.random().toString(36).substr(2, 9);
+                return `
+                <div class="chat-sim-music-container chat-sim-raw-media">
+                    <div class="chat-sim-new-music music-play-btn" data-target="${musicId}">
+                        <div class="music-art"><i class="fa-solid fa-music"></i></div>
+                        <div class="music-info">
+                            <p style="margin: 0; font-size: 13px; font-weight: 600;">${title.trim()}</p>
+                            <p style="margin: 2px 0 0; font-size: 11px; color: #888;">${artist.trim()}</p>
+                        </div>
+                        <div class="music-play"><i class="fa-solid fa-play music-icon-${musicId}"></i></div>
+                    </div>
+                    <div class="chat-sim-music-lyrics" id="lyrics_${musicId}" style="display: none;">
+                        ${lyrics.trim().replace(/\n/g, '<br>')}
+                    </div>
+                </div>`;
             });
             modified = true;
         }
@@ -363,6 +378,23 @@ jQuery(async () => {
             $(this).toggleClass("playing");
         });
 
+            // --- NEW: ผูก Event ให้กล่องเพลง (กดเพื่อโชว์เนื้อเพลง) ---
+        $("#chat").on("click", ".music-play-btn", function() {
+            const targetId = $(this).data("target");
+            const lyricsElement = $(`#lyrics_${targetId}`);
+            const iconElement = $(`.music-icon-${targetId}`);
+
+            // สลับการแสดงผลเนื้อเพลง
+            lyricsElement.slideToggle(200);
+
+            // สลับไอคอน Play/Pause
+            if (iconElement.hasClass("fa-play")) {
+                iconElement.removeClass("fa-play").addClass("fa-pause");
+            } else {
+                iconElement.removeClass("fa-pause").addClass("fa-play");
+            }
+        });
+    
     // --- NEW: ผูก Event ให้ Dropdown เลือกธีม ---
     $(document).on("change", "#chat-simulator-theme-select", function () {
         const selected = $(this).val();
