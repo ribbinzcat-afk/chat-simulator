@@ -357,3 +357,21 @@ img.chat-sim-call-avatar-img {
 
 .call-btn.end-call { background-color: #ff4b4b; color: white; box-shadow: 0 4px 10px rgba(255, 75, 75, 0.4); }
 .call-btn.end-call:hover { background-color: #ff3333; transform: scale(1.05); }
+
+/* --- ป้องกัน UI พิเศษโดนบีบเมื่ออยู่ในบับเบิ้ลแชท --- */
+.chat-sim-bubble .chat-sim-new-slip,
+.chat-sim-bubble .chat-sim-new-loc,
+.chat-sim-bubble .chat-sim-new-music,
+.chat-sim-bubble .chat-sim-new-voice,
+.chat-sim-bubble .chat-sim-new-gift-closed,
+.chat-sim-bubble .chat-sim-new-gift-opened {
+    margin-top: 8px;
+    margin-bottom: 0;
+    max-width: 100%; /* ให้ขยายกว้างเต็มบับเบิ้ลที่มันอยู่ */
+    box-sizing: border-box;
+}
+
+/* ลบ margin ส่วนเกินของกล่องเสียงเมื่ออยู่ในบับเบิ้ล */
+.chat-sim-bubble .chat-sim-voice-container {
+    margin: 0;
+}
