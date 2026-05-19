@@ -108,60 +108,187 @@ img.chat-sim-media {
 }
 
 /* =========================================
-   5. กล่องพิเศษ (อั่งเปา, สลิป, พิกัด, ฯลฯ)
+   5. กล่องพิเศษ (UI ใหม่ตามที่คุณออกแบบ)
    ========================================= */
-.chat-sim-special-box {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 14px;
+
+/* --- Slip (สลิปโอนเงิน) --- */
+.chat-sim-new-slip {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 280px;
     margin-top: 8px;
-    border-radius: var(--chatsim-radius-box);
-    min-width: 220px;
-    box-shadow: var(--chatsim-shadow-soft);
-    transition: var(--chatsim-transition);
-    color: #ffffff; /* ตัวหนังสือในกล่องพิเศษเป็นสีขาวเสมอ */
+    color: #333;
 }
-
-.chat-sim-special-box:hover {
-    box-shadow: var(--chatsim-shadow-hover);
-    transform: translateY(-2px); /* ลอยขึ้นนิดๆ เมื่อเอาเมาส์ชี้ */
+.slip-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px dashed #ddd;
 }
-
-.chat-sim-icon {
-    font-size: 1.8em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    background: rgba(255, 255, 255, 0.2); /* พื้นหลังไอคอนโปร่งแสง */
+.slip-icon {
+    width: 40px; height: 40px;
+    background-color: #00b894;
     border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 20px;
+}
+.slip-details { padding: 15px; font-size: 12px; }
+.slip-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+
+/* --- Location (พิกัด) --- */
+.chat-sim-new-loc {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 280px;
+    margin-top: 8px;
+    color: #333;
+}
+.loc-map {
+    height: 120px;
+    background-color: #e3f2fd;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+}
+.loc-grid {
+    position: absolute; width: 100%; height: 100%;
+    background-image: linear-gradient(#cfd8dc 1px, transparent 1px), linear-gradient(90deg, #cfd8dc 1px, transparent 1px);
+    background-size: 20px 20px; opacity: 0.5;
+}
+.loc-pin {
+    width: 30px; height: 30px;
+    background-color: #ff5252;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    position: relative;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+.loc-pin-dot {
+    width: 10px; height: 10px;
+    background-color: white; border-radius: 50%;
+    position: absolute; top: 10px; left: 10px;
 }
 
-.chat-sim-details { display: flex; flex-direction: column; }
-.chat-sim-title { font-weight: 700; font-size: 1.05em; margin-bottom: 2px; }
-.chat-sim-desc { font-size: 0.85em; opacity: 0.9; }
-.chat-sim-amount { font-weight: 800; font-size: 1.2em; margin-top: 4px; }
+/* --- Music (เพลง) --- */
+.chat-sim-new-music {
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    width: 100%;
+    max-width: 280px;
+    display: flex; align-items: center;
+    padding: 10px; gap: 10px;
+    margin-top: 8px;
+    color: #333;
+}
+.music-art {
+    width: 50px; height: 50px;
+    background-color: var(--chatsim-color-music);
+    border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: white;
+}
+.music-play {
+    width: 24px; height: 24px;
+    border: 1px solid #ddd; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; flex-shrink: 0;
+}
 
-/* การดึงสีจาก Root มาใช้ */
-.chat-sim-gift { background-color: var(--chatsim-color-gift); }
-.chat-sim-slip { background-color: var(--chatsim-color-slip); }
-.chat-sim-loc { background-color: var(--chatsim-color-loc); }
-.chat-sim-music { background-color: var(--chatsim-color-music); }
-.chat-sim-voice { background-color: var(--chatsim-color-voice); }
-
-/* ปุ่ม Play ข้อความเสียง */
-.voice-play-btn { cursor: pointer; transition: var(--chatsim-transition); }
-.voice-play-btn:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.05); }
+/* --- Voice (ข้อความเสียง) --- */
+.chat-sim-new-voice {
+    background-color: #f1f0f0;
+    color: #333;
+    padding: 12px 15px;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    display: flex; align-items: center; gap: 10px;
+    min-width: 200px; max-width: 280px;
+    margin-top: 8px;
+}
+.voice-play-btn {
+    width: 30px; height: 30px;
+    background-color: #333; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    cursor: pointer; transition: transform 0.2s;
+}
+.voice-play-btn:hover { transform: scale(1.1); }
+.voice-play-icon {
+    width: 0; height: 0;
+    border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 8px solid white;
+    margin-left: 2px; transition: all 0.2s;
+}
+/* เปลี่ยนไอคอนเป็น Pause เมื่อมีคลาส playing */
+.voice-play-btn.playing .voice-play-icon {
+    border: none; width: 8px; height: 10px;
+    border-left: 3px solid white; border-right: 3px solid white; margin-left: 0;
+}
+.voice-waveform {
+    flex-grow: 1; height: 20px;
+    display: flex; align-items: center; gap: 2px;
+}
+.wave-bar { width: 3px; border-radius: 2px; }
+.wb-1 { height: 8px; background-color: #999; }
+.wb-2 { height: 15px; background-color: #666; }
+.wb-3 { height: 10px; background-color: #999; }
+.wb-4 { height: 18px; background-color: #666; }
+.wb-5 { height: 12px; background-color: #999; }
+.wb-6 { height: 6px; background-color: #ccc; }
+.wb-7 { height: 14px; background-color: #666; }
 .chat-sim-voice-text {
-    font-size: 0.9em;
-    color: inherit;
-    border-left: 4px solid var(--chatsim-color-voice);
-    padding: 10px;
-    margin-top: 10px;
-    background: rgba(0,0,0,0.03);
-    border-radius: 0 8px 8px 0;
+    font-size: 0.9em; border-left: 3px solid #333;
+    padding-left: 10px; margin-top: 8px; font-style: italic; color: inherit;
+}
+
+/* --- Ang Pao (อั่งเปา) --- */
+.chat-sim-new-gift-closed {
+    background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+    color: #fff; border-radius: 18px;
+    position: relative; overflow: hidden;
+    width: 240px; cursor: pointer; margin-top: 8px;
+    box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
+    transition: transform 0.2s;
+}
+.chat-sim-new-gift-closed:hover { transform: scale(1.02); }
+.gift-decor {
+    position: absolute; top: -10px; right: -10px;
+    width: 50px; height: 50px;
+    background: rgba(255, 215, 0, 0.2); border-radius: 50%;
+}
+.gift-content { padding: 15px; display: flex; align-items: center; gap: 12px; }
+.gift-icon {
+    background-color: #ffb300; width: 45px; height: 45px;
+    border-radius: 50%; display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: 2px solid #ffe082; font-size: 24px;
+}
+.gift-footer {
+    background-color: rgba(0,0,0,0.1); padding: 8px 15px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; color: #ffecb3;
+}
+
+.chat-sim-new-gift-opened {
+    background: #fff8e1; border: 1px solid #ffe082;
+    border-radius: 15px; position: relative; overflow: hidden;
+    width: 220px; margin-top: 8px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+.gift-open-strip { background: #d32f2f; height: 8px; width: 100%; }
+.gift-open-content { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.gift-open-icon {
+    font-size: 24px; background: #fff; width: 40px; height: 40px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #d32f2f;
 }
 
 /* =========================================
