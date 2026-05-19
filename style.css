@@ -64,8 +64,9 @@
     font-size: 0.95em;
     line-height: 1.5;
     word-wrap: break-word;
-      overflow-wrap: break-word;
+   word-break: break-word;
     box-sizing: border-box;
+   white-space: pre-wrap;
     box-shadow: var(--chatsim-shadow-soft);
 }
 
