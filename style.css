@@ -58,12 +58,14 @@
    3. บับเบิ้ลแชท (Chat Bubbles)
    ========================================= */
 .chat-sim-bubble {
-    max-width: 75%;
+    max-width: calc(100% - 56px); /* <-- คำนวณพื้นที่: 100% หักลบรูปโปรไฟล์ (36px) และ Margin (20px) */
     padding: 12px 16px;
     border-radius: var(--chatsim-radius-bubble);
     font-size: 0.95em;
     line-height: 1.5;
     word-wrap: break-word;
+      overflow-wrap: break-word;
+    box-sizing: border-box;
     box-shadow: var(--chatsim-shadow-soft);
 }
 
@@ -122,8 +124,8 @@ img.chat-sim-media {
     box-sizing: border-box;
     margin-top: 8px;
     margin-bottom: 4px;
-    width: 260px; /* กำหนดความกว้างคงที่ไปเลย เพื่อป้องกันการบีบ/ยืดผิดรูป */
-    max-width: 100%; /* เผื่อจอมือถือเล็กมากๆ */
+    width: 100%; /* <-- เปลี่ยนให้กว้างเต็มที่เท่าที่ทำได้ */
+    max-width: 260px; /* <-- แต่ไม่เกิน 260px (บนจอคอมจะได้ไม่ใหญ่ยักษ์) */
 }
 
 /* ป้องกันบับเบิ้ลหลักบีบของข้างใน */
@@ -228,9 +230,10 @@ img.chat-sim-media {
     border: none; width: 8px; height: 10px;
     border-left: 3px solid white; border-right: 3px solid white; margin-left: 0;
 }
+/* ให้คลื่นเสียงยืดหยุ่นและซ่อนส่วนที่ล้นถ้าจอมือถือเล็กจัด */
 .voice-waveform {
     flex-grow: 1; height: 20px; display: flex; align-items: center; gap: 2px;
-    overflow: hidden; /* ป้องกันคลื่นเสียงล้น */
+    overflow: hidden; min-width: 50px; /* <-- เพิ่ม min-width กันมันหดจนหายไป */
 }
 .wave-bar { width: 3px; border-radius: 2px; flex-shrink: 0; }
 .wb-1 { height: 8px; background-color: #999; }
