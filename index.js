@@ -204,52 +204,126 @@ function processChatUIInDOM() {
             modified = true;
         }
 
-        // 2. [GIFT]
+        // ดึงชื่อคนส่ง (เพื่อเอาไปใส่ในสลิปและอั่งเปา)
+        const senderName = isUser ? 'คุณ' : ($(this).attr('ch_name') || 'ตัวละคร');
+
+        // 2. [GIFT] - อั่งเปา (Interactive: กดเปิดได้)
         const giftRegex = /\[GIFT:(open|closed)\](.*?)\[\/GIFT\]/g;
         if (giftRegex.test(html)) {
             html = html.replace(giftRegex, (match, status, amount) => {
                 const isOpen = status === 'open';
-                const icon = isOpen ? 'fa-envelope-open-text' : 'fa-envelope';
-                const text = isOpen ? `เปิดอั่งเปาแล้ว: ${amount}` : 'ส่งอั่งเปาให้คุณ';
-                const opacity = isOpen ? '0.6' : '1';
-                return `<div class="chat-sim-special-box chat-sim-gift" style="opacity: ${opacity};"><div class="chat-sim-icon"><i class="fa-solid ${icon}"></i></div><div class="chat-sim-details"><div class="chat-sim-title">อั่งเปา</div><div class="chat-sim-desc">${text}</div></div></div>`;
+
+                // UI ซองที่เปิดแล้ว
+                const openedHtml = `
+                <div class="chat-sim-new-gift-opened" ${!isOpen ? 'style="display: none;"' : ''}>
+                    <div class="gift-open-strip"></div>
+                    <div class="gift-open-content">
+                        <div class="gift-open-icon">🧧</div>
+                        <span style="font-size: 12px; color: #795548; margin-top: 5px;">คุณได้รับอั่งเปาแล้ว</span>
+                        <div style="font-size: 20px; font-weight: 700; color: #d32f2f;">${amount}</div>
+                        <span style="font-size: 10px; color: #9e9e9e;">โอนเข้าธนาคารเรียบร้อย</span>
+                    </div>
+                </div>`;
+
+                // UI ซองปิด (มี onclick เพื่อซ่อนตัวเองและโชว์ซองเปิด)
+                const closedHtml = `
+                <div class="chat-sim-new-gift-closed" onclick="$(this).hide(); $(this).siblings('.chat-sim-new-gift-opened').fadeIn(300);">
+                    <div class="gift-decor"></div>
+                    <div class="gift-content">
+                        <div class="gift-icon">🧧</div>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-size: 15px; font-weight: 600; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">อั่งเปาของขวัญ</span>
+                            <span style="font-size: 12px; color: #ffecb3;">กดเพื่อเปิดซองของขวัญ</span>
+                        </div>
+                    </div>
+                    <div class="gift-footer">
+                        <span>${senderName} ส่งของขวัญให้คุณ</span><span style="color: #fff;">>></span>
+                    </div>
+                </div>`;
+
+                // ถ้าสถานะคือ open ให้แสดงแค่ซองเปิด ถ้า closed ให้แสดงทั้งคู่ (ซองเปิดซ่อนไว้)
+                return `<div class="angpao-wrapper">${isOpen ? openedHtml : closedHtml + openedHtml}</div>`;
             });
             modified = true;
         }
 
-        // 3. [SLIP]
+        // 3. [SLIP] - สลิปโอนเงิน
         const slipRegex = /\[SLIP:(.*?)\](.*?)\[\/SLIP\]/g;
         if (slipRegex.test(html)) {
             html = html.replace(slipRegex, (match, name, amount) => {
-                return `<div class="chat-sim-special-box chat-sim-slip"><div class="chat-sim-icon"><i class="fa-solid fa-building-columns"></i></div><div class="chat-sim-details"><div class="chat-sim-title">โอนเงินสำเร็จ</div><div class="chat-sim-desc">ถึง: ${name}</div><div class="chat-sim-amount">฿${amount}</div></div></div>`;
+                return `
+                <div class="chat-sim-new-slip">
+                    <div class="slip-header">
+                        <div class="slip-icon"><i class="fa-solid fa-building-columns"></i></div>
+                        <p style="margin: 0; font-size: 14px; color: #555;">โอนเงินสำเร็จ</p>
+                        <p style="margin: 5px 0 0; font-size: 24px; font-weight: 600;">฿${amount}</p>
+                    </div>
+                    <div class="slip-details">
+                        <div class="slip-row"><span style="color: #888;">จาก</span><span style="font-weight: 500;">${senderName}</span></div>
+                        <div class="slip-row"><span style="color: #888;">ไปยัง</span><span style="font-weight: 500;">${name}</span></div>
+                    </div>
+                </div>`;
             });
             modified = true;
         }
 
-        // 4. [LOC]
+        // 4. [LOC] - พิกัด
         const locRegex = /\[LOC:(.*?)\](.*?)\[\/LOC\]/g;
         if (locRegex.test(html)) {
             html = html.replace(locRegex, (match, name, desc) => {
-                return `<div class="chat-sim-special-box chat-sim-loc"><div class="chat-sim-icon"><i class="fa-solid fa-location-dot"></i></div><div class="chat-sim-details"><div class="chat-sim-title">${name}</div><div class="chat-sim-desc">${desc}</div></div></div>`;
+                return `
+                <div class="chat-sim-new-loc">
+                    <div class="loc-map">
+                        <div class="loc-grid"></div>
+                        <div class="loc-pin"><div class="loc-pin-dot"></div></div>
+                    </div>
+                    <div style="padding: 12px;">
+                        <p style="margin: 0; font-size: 14px; font-weight: 600;">${name}</p>
+                        <p style="margin: 4px 0 0; font-size: 11px; color: #777; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${desc}</p>
+                    </div>
+                </div>`;
             });
             modified = true;
         }
 
-        // 5. [MUSIC]
+        // 5. [MUSIC] - เพลง
         const musicRegex = /\[MUSIC:(.*?)\](.*?)\[\/MUSIC\]/g;
         if (musicRegex.test(html)) {
             html = html.replace(musicRegex, (match, title, artist) => {
-                return `<div class="chat-sim-special-box chat-sim-music"><div class="chat-sim-icon"><i class="fa-solid fa-circle-play"></i></div><div class="chat-sim-details"><div class="chat-sim-title">${title}</div><div class="chat-sim-desc">${artist}</div></div></div>`;
+                return `
+                <div class="chat-sim-new-music">
+                    <div class="music-art"><i class="fa-solid fa-music"></i></div>
+                    <div style="display: flex; flex-direction: column; justify-content: center; flex-grow: 1;">
+                        <p style="margin: 0; font-size: 13px; font-weight: 600;">${title}</p>
+                        <p style="margin: 2px 0 0; font-size: 11px; color: #888;">${artist}</p>
+                    </div>
+                    <div class="music-play">▶</div>
+                </div>`;
             });
             modified = true;
         }
 
-        // 6. [VOICE]
+        // 6. [VOICE] - ข้อความเสียง
         const voiceRegex = /\[VOICE\]([\s\S]*?)\[\/VOICE\]/g;
         if (voiceRegex.test(html)) {
             html = html.replace(voiceRegex, (match, text) => {
                 const voiceId = 'voice_' + Math.random().toString(36).substr(2, 9);
-                return `<div class="chat-sim-voice-container"><div class="chat-sim-special-box chat-sim-voice" id="box_${voiceId}"><div class="chat-sim-icon voice-play-btn" data-target="${voiceId}" style="cursor: pointer;"><i class="fa-solid fa-play"></i></div><div class="chat-sim-details"><div class="chat-sim-title">ข้อความเสียง</div><div class="chat-sim-desc">แตะเพื่อฟัง</div></div></div><div class="chat-sim-voice-text" id="text_${voiceId}" style="display: none;">" ${text.trim()} "</div></div>`;
+                return `
+                <div class="chat-sim-voice-container">
+                    <div class="chat-sim-new-voice" id="box_${voiceId}">
+                        <div class="voice-play-btn" data-target="${voiceId}">
+                            <div class="voice-play-icon"></div>
+                        </div>
+                        <div class="voice-waveform">
+                            <div class="wave-bar wb-1"></div><div class="wave-bar wb-2"></div>
+                            <div class="wave-bar wb-3"></div><div class="wave-bar wb-4"></div>
+                            <div class="wave-bar wb-5"></div><div class="wave-bar wb-6"></div>
+                            <div class="wave-bar wb-7"></div><div class="wave-bar wb-1"></div>
+                        </div>
+                        <span style="font-size: 12px; color: #555; font-weight: 500;">00:15</span>
+                    </div>
+                    <div class="chat-sim-voice-text" id="text_${voiceId}" style="display: none;">" ${text.trim()} "</div>
+                </div>`;
             });
             modified = true;
         }
@@ -353,23 +427,17 @@ jQuery(async () => {
         }
     });
 
-    // --- NEW: ผูก Event ให้ปุ่ม Play ของข้อความเสียง ---
-    // ใช้ delegation กับ #chat (พื้นที่แชทหลัก) เพื่อให้ปุ่มที่เพิ่งถูกสร้างใหม่ทำงานได้ด้วย
-    $("#chat").on("click", ".voice-play-btn", function () {
-        const targetId = $(this).data("target");
-        const textElement = $(`#text_${targetId}`);
-        const iconElement = $(this).find("i");
+        // --- อัปเดต: ผูก Event ให้ปุ่ม Play ของข้อความเสียง ---
+        $("#chat").on("click", ".voice-play-btn", function() {
+            const targetId = $(this).data("target");
+            const textElement = $(`#text_${targetId}`);
 
-        // สลับการแสดงผลข้อความ
-        textElement.slideToggle(200);
+            // สลับการแสดงผลข้อความ
+            textElement.slideToggle(200);
 
-        // สลับไอคอน Play / Pause
-        if (iconElement.hasClass("fa-play")) {
-            iconElement.removeClass("fa-play").addClass("fa-pause");
-        } else {
-            iconElement.removeClass("fa-pause").addClass("fa-play");
-        }
-    });
+            // สลับคลาส playing เพื่อเปลี่ยนไอคอน Play/Pause ด้วย CSS
+            $(this).toggleClass("playing");
+        });
 
     // --- NEW: ผูก Event ให้ Dropdown เลือกธีม ---
     $(document).on("change", "#chat-simulator-theme-select", function () {
